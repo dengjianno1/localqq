@@ -1,12 +1,16 @@
 package com.djsoft.localqq.adapter;
 
+import android.content.Intent;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.djsoft.localqq.ChatActivity;
+import com.djsoft.localqq.MyApplication;
 import com.djsoft.localqq.R;
 import com.djsoft.localqq.db.Friend;
 
@@ -26,7 +30,18 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.ViewHolder
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view= LayoutInflater.from(parent.getContext()).inflate(R.layout.friend_item,parent,false);
-        ViewHolder holder=new ViewHolder(view);
+        final ViewHolder holder=new ViewHolder(view);
+        holder.friendView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                int position=holder.getAdapterPosition();
+                Friend friend=mFriendList.get(position);
+                Toast.makeText(MyApplication.getContext(), friend.toString(), Toast.LENGTH_SHORT).show();
+                Intent chatIntent=new Intent(MyApplication.getContext(), ChatActivity.class);
+                chatIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                MyApplication.getContext().startActivity(chatIntent);
+            }
+        });
         return holder;
     }
 
@@ -44,11 +59,13 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.ViewHolder
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder{
+        View friendView;
         ImageView friendImage;
         TextView friendName;
         TextView friendAddress;
         public ViewHolder(View itemView) {
             super(itemView);
+            friendView=itemView;
             friendImage=(ImageView) itemView.findViewById(R.id.friend_image);
             friendName=(TextView) itemView.findViewById(R.id.friend_name);
             friendAddress=(TextView) itemView.findViewById(R.id.friend_address);
