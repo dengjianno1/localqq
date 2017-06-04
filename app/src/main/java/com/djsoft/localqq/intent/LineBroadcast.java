@@ -75,7 +75,7 @@ public class LineBroadcast {
                         } else if (packet.getData()[0] == -1) {
                            doFriendOffLine(packet,listener);
                         }else {
-                            TransportMessage.receiveMessage();
+                            TransportMessage.receiveMessage(packet);
                         }
                     } catch (IOException e) {
                         e.printStackTrace();

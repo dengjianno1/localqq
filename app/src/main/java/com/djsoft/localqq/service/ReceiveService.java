@@ -15,8 +15,10 @@ import java.net.DatagramSocket;
 import java.net.SocketException;
 
 public class ReceiveService extends Service {
-    private DatagramSocket socket;
+    public static DatagramSocket socket;
     private DatagramPacket packet;
+    public static String selfHostName;
+    public static String selfAddress;
     private LocalBroadcastManager broadcastManager=LocalBroadcastManager.getInstance(this);
     private ReceiveListener listener=new ReceiveListener() {
         @Override

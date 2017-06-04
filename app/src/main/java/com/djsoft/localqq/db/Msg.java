@@ -10,7 +10,8 @@ public class Msg {
     private int id;
     private String content;
     private int type;
-    private Friend fromFriend;
+    private String hostName;
+    private String address;
     private String dataTime;
 
     public int getId() {
@@ -37,19 +38,27 @@ public class Msg {
         this.type = type;
     }
 
-    public Friend getFromFriend() {
-        return fromFriend;
-    }
-
-    public void setFromFriend(Friend fromFriend) {
-        this.fromFriend = fromFriend;
-    }
-
     public String getDataTime() {
         return dataTime;
     }
 
     public void setDataTime(String dataTime) {
         this.dataTime = dataTime;
+    }
+
+    public String getHostName() {
+        return hostName;
+    }
+
+    public void setHostName(String hostName) {
+        this.hostName = hostName;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
     }
 }

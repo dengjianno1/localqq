@@ -31,20 +31,35 @@ public class MsgAdapter extends ArrayAdapter<Msg> {
     @Override
     public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
         Msg msg=getItem(position);
-        View view= LayoutInflater.from(getContext()).inflate(resourceId, parent,false);
-        LinearLayout leftLayout=(LinearLayout) view.findViewById(R.id.left_layout);
-        LinearLayout rightLayout=(LinearLayout) view.findViewById(R.id.right_layout);
-        TextView leftMsg=(TextView) view.findViewById(R.id.left_msg);
-        TextView rightMsg=(TextView) view.findViewById(R.id.right_msg);
+        View view;
+        ViewHolder viewHolder;
+        if (convertView==null){
+            view= LayoutInflater.from(getContext()).inflate(resourceId, parent,false);
+            viewHolder=new ViewHolder();
+            viewHolder.leftLayout=(LinearLayout) view.findViewById(R.id.left_layout);
+            viewHolder.rightLayout=(LinearLayout) view.findViewById(R.id.right_layout);
+            viewHolder.leftMsg=(TextView) view.findViewById(R.id.left_msg);
+            viewHolder.rightMsg=(TextView) view.findViewById(R.id.right_msg);
+            view.setTag(viewHolder);
+        }else {
+            view=convertView;
+            viewHolder=(ViewHolder) view.getTag();
+        }
         if (msg.getType()==Msg.TYPE_RECEIVED){
-            rightLayout.setVisibility(View.GONE);
-            leftLayout.setVisibility(View.VISIBLE);
-            leftMsg.setText(msg.getContent());
+            viewHolder.rightLayout.setVisibility(View.GONE);
+            viewHolder.leftLayout.setVisibility(View.VISIBLE);
+            viewHolder.leftMsg.setText(msg.getContent());
         }else if (msg.getType()==Msg.TYPE_SENT){
-            leftLayout.setVisibility(View.GONE);
-            rightLayout.setVisibility(View.VISIBLE);
-            rightMsg.setText(msg.getContent());
+            viewHolder.leftLayout.setVisibility(View.GONE);
+            viewHolder.rightLayout.setVisibility(View.VISIBLE);
+            viewHolder.rightMsg.setText(msg.getContent());
         }
         return view;
+    }
+    class ViewHolder{
+        LinearLayout leftLayout;
+        LinearLayout rightLayout;
+        TextView leftMsg;
+        TextView rightMsg;
     }
 }

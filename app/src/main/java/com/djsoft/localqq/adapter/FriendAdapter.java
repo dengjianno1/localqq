@@ -7,7 +7,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.djsoft.localqq.ChatActivity;
 import com.djsoft.localqq.MyApplication;
@@ -36,8 +35,9 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.ViewHolder
             public void onClick(View v) {
                 int position=holder.getAdapterPosition();
                 Friend friend=mFriendList.get(position);
-                Toast.makeText(MyApplication.getContext(), friend.toString(), Toast.LENGTH_SHORT).show();
                 Intent chatIntent=new Intent(MyApplication.getContext(), ChatActivity.class);
+                chatIntent.putExtra("address",friend.getAddress());
+                chatIntent.putExtra("hostName",friend.getHostName());
                 chatIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 MyApplication.getContext().startActivity(chatIntent);
             }
