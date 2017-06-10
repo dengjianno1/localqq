@@ -1,11 +1,13 @@
 package com.djsoft.localqq;
 
 import android.content.Intent;
+import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
 
 import com.ashokvarma.bottomnavigation.BottomNavigationBar;
 import com.ashokvarma.bottomnavigation.BottomNavigationItem;
@@ -50,10 +52,19 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
+        Button exitButton=(Button) findViewById(R.id.exit_button);
+        exitButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent stopIntent=new Intent(MainActivity.this,ReceiveService.class);
+                stopService(stopIntent);
+
+                finish();
+            }
+        });
         //初始化各组件后启动接收消息服务
         Intent intent=new Intent(this, ReceiveService.class);
         startService(intent);
-
     }
     private void replaceFragment(Fragment fragment){
         FragmentManager fragmentManager=getSupportFragmentManager();

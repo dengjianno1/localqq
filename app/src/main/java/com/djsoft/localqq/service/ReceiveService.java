@@ -3,45 +3,20 @@ package com.djsoft.localqq.service;
 import android.app.Service;
 import android.content.Intent;
 import android.os.IBinder;
-import android.support.v4.content.LocalBroadcastManager;
-import android.util.Log;
 
-import com.djsoft.localqq.db.Friend;
-import com.djsoft.localqq.intent.CustomPort;
 import com.djsoft.localqq.intent.LineBroadcast;
+import com.djsoft.localqq.intent.TransportMessage;
+import com.djsoft.localqq.util.Constant;
 
+import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.SocketException;
 
 public class ReceiveService extends Service {
     public static DatagramSocket socket;
-    private DatagramPacket packet;
-    public static String selfHostName;
-    public static String selfAddress;
-    private LocalBroadcastManager broadcastManager=LocalBroadcastManager.getInstance(this);
-    private ReceiveListener listener=new ReceiveListener() {
-        @Override
-        public void onLine(Friend friend) {
-            //发送上线广播
-            Log.d("ReceiveService", "onLine: 回调后上线");
-            Intent onLineIntent=new Intent("com.djsoft.localqq.online");
-            broadcastManager.sendBroadcast(onLineIntent);
-        }
+    private Thread receiveThread;
 
-        @Override
-        public void offLine(Friend friend) {
-            //发送下线广播
-            Log.d("ReceiveService", "onLine: 回调后下线");
-            Intent offLineIntent=new Intent("com.djsoft.localqq.offline");
-            broadcastManager.sendBroadcast(offLineIntent);
-        }
-
-        @Override
-        public void getMessage() {
-            //处理接收消息逻辑,使用handle
-        }
-    };
     public ReceiveService() {
     }
 
@@ -52,8 +27,7 @@ public class ReceiveService extends Service {
     public void onCreate() {
         super.onCreate();
         try {
-            socket=new DatagramSocket(CustomPort.PORT);
-            packet=new DatagramPacket(new byte[1024], 1024);
+            socket = new DatagramSocket(Constant.PORT);
         } catch (SocketException e) {
             e.printStackTrace();
         }
@@ -64,10 +38,38 @@ public class ReceiveService extends Service {
      */
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        LineBroadcast.sendOnLine(socket,CustomPort.PORT);
-        LineBroadcast.ReceivePacket(socket,packet,listener);
+        /**
+         * 开启线程，接收Packet
+         */
+        receiveThread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                DatagramPacket packet=new DatagramPacket(new byte[1024], 1024);
+                while (!Thread.currentThread().isInterrupted()) {
+                    try {
+                        socket.receive(packet);
+                        if (packet.getData()[0] == 1) {
+                            LineBroadcast.doFriendOnLine(packet);
+                        } else if (packet.getData()[0] == -1) {
+                            LineBroadcast.doFriendOffLine(packet);
+                        } else {
+                            TransportMessage.receiveMessage(packet);
+                        }
+                    } catch (IOException e) {
+                        Thread.currentThread().interrupt();
+                        e.printStackTrace();
+                    }
+                }
+            }
+        });
+        receiveThread.start();
+        try {
+            Thread.sleep(500);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        LineBroadcast.sendOnLine(socket, Constant.PORT);
         return super.onStartCommand(intent, flags, startId);
-
     }
 
     /**
@@ -76,7 +78,20 @@ public class ReceiveService extends Service {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        LineBroadcast.sendOffLine(socket,CustomPort.PORT);
+        //打中断标志
+        receiveThread.interrupt();
+        try {
+            Thread.sleep(500);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        //处理下线逻辑
+        LineBroadcast.sendOffLine(socket, Constant.PORT);
+        try {
+            Thread.sleep(500);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         socket.close();
     }
 

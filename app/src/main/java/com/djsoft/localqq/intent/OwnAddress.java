@@ -1,6 +1,11 @@
 package com.djsoft.localqq.intent;
 
+import android.content.Context;
+import android.net.wifi.WifiInfo;
+import android.net.wifi.WifiManager;
 import android.os.Build;
+
+import com.djsoft.localqq.MyApplication;
 
 import java.net.InetAddress;
 import java.net.NetworkInterface;
@@ -14,6 +19,7 @@ import java.util.Enumeration;
 public class OwnAddress {
     public static final String HOST_NAME= Build.BRAND+" "+Build.MODEL;
     public static final String HOST_ADDRESS=getLocalIpAddress();
+    public static final String HOST_WIFIADDRESS=getWiFiAddress();
     private static String getLocalIpAddress() {
         try {
             Enumeration enumNetwork = NetworkInterface.getNetworkInterfaces();
@@ -31,5 +37,18 @@ public class OwnAddress {
             e.printStackTrace();
         }
         return null;
+    }
+    private static String getWiFiAddress(){
+        WifiManager wifiManager = (WifiManager) MyApplication.getContext().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+        //判断wifi是否开启  
+        if (!wifiManager.isWifiEnabled()) {  
+        wifiManager.setWifiEnabled(true);    
+        }  
+        WifiInfo wifiInfo = wifiManager.getConnectionInfo();
+        int ipAddress = wifiInfo.getIpAddress();
+        return (ipAddress & 0xFF ) + "." +
+        ((ipAddress >> 8 ) & 0xFF) + "." +
+        ((ipAddress >> 16 ) & 0xFF) + "." +
+        ( ipAddress >> 24 & 0xFF) ;
     }
 }

@@ -1,12 +1,12 @@
 package com.djsoft.localqq.db;
 
+import org.litepal.crud.DataSupport;
+
 /**
  * Created by dengjian on 2017/6/4.
  */
 
-public class Msg {
-    public static final int TYPE_RECEIVED=0;
-    public static final int TYPE_SENT=1;
+public class Msg extends DataSupport{
     private int id;
     private String content;
     private int type;
