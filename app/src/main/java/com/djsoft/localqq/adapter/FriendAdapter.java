@@ -12,6 +12,7 @@ import com.djsoft.localqq.ChatActivity;
 import com.djsoft.localqq.MyApplication;
 import com.djsoft.localqq.R;
 import com.djsoft.localqq.db.Friend;
+import com.djsoft.localqq.util.Constant;
 
 import java.util.List;
 
@@ -38,6 +39,7 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.ViewHolder
                 Intent chatIntent=new Intent(MyApplication.getContext(), ChatActivity.class);
                 chatIntent.putExtra("address",friend.getAddress());
                 chatIntent.putExtra("hostName",friend.getHostName());
+                chatIntent.putExtra("status", Constant.STATUS_ONLINE);
                 chatIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 MyApplication.getContext().startActivity(chatIntent);
             }

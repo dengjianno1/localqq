@@ -54,6 +54,7 @@ public class ChatActivity extends AppCompatActivity {
         Intent intent=getIntent();
         final String hostName=intent.getStringExtra("hostName");
         final String address=intent.getStringExtra("address");
+        int status=intent.getIntExtra("status",Constant.STATUS_OFFLINE);//默认不在线
         TextView titleView=(TextView) findViewById(R.id.title_text);
         titleView.setText(hostName);
         msgList=getChatRecord(address);
@@ -80,6 +81,9 @@ public class ChatActivity extends AppCompatActivity {
                 }
             }
         });
+        if (status==Constant.STATUS_OFFLINE){
+            sendButton.setEnabled(false);
+        }
         contentText.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

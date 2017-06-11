@@ -62,7 +62,7 @@ public class TransportMessage {
     public static String getFriendName(String address){
         List<Friend> friendList= DataSupport.select("hostName").where("address=?",address).find(Friend.class);
         if (friendList.isEmpty()){
-            Log.e("TransportMessage", "从数据库中获取好友主机名数量大于1",new Exception() );
+            Log.e("TransportMessage", "从数据库中获取好友主机名数量为0",new Exception() );
         }else if (friendList.size()>1){
             Log.e("TransportMessage", "从数据库中获取好友主机名数量大于1",new Exception() );
         }else {

@@ -58,11 +58,12 @@ public class RecordFragment extends Fragment {
         //查找最近一条记录
         for (String address:addressList) {
             //Msg msg=DataSupport.select("address","content","dateTime").where("address=?",address).order("id").findLast(Msg.class);
-            cursor=DataSupport.findBySQL("select hostName,content,dateTime from Msg where address=? order by id desc",address);
+            cursor=DataSupport.findBySQL("select hostName,address,content,dateTime from Msg where address=? order by id desc",address);
             if (cursor!=null){
                 while (cursor.moveToNext()){
                     Record record=new Record();
                     record.setHostName(trimContent(cursor.getString(cursor.getColumnIndex("hostname"))));
+                    record.setAddress(cursor.getString(cursor.getColumnIndex("address")));
                     record.setContent(trimContent(cursor.getString(cursor.getColumnIndex("content"))));
                     record.setDateTime(cursor.getString(cursor.getColumnIndex("datetime")));
                     recordList.add(record);
