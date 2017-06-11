@@ -16,8 +16,10 @@ import static android.content.Context.VIBRATOR_SERVICE;
 
 public abstract class Constant {
     public static final int PORT=2426;
-    public static final SimpleDateFormat SDF =new SimpleDateFormat("MM月dd日 HH:mm:ss");
-    public static final SimpleDateFormat SDF_DB =new SimpleDateFormat("yyyyMMddHHmmssSSS");
+    public static final SimpleDateFormat SDF_A =new SimpleDateFormat("HH:mm");
+    public static final SimpleDateFormat SDF_B =new SimpleDateFormat("E");
+    public static final SimpleDateFormat SDF_C =new SimpleDateFormat("MM月dd日");
+    public static final SimpleDateFormat SDF_DB =new SimpleDateFormat("yyyyMMddHHmmss");
     public static final  int STATUS_ONLINE=1;
     public static final int STATUS_OFFLINE=-1;
     public static final int TYPE_RECEIVED=0;

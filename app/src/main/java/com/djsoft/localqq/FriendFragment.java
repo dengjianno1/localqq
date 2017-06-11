@@ -9,7 +9,6 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -26,7 +25,6 @@ public class FriendFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        Log.d("TAG", "onCreateView: ");
         View view=inflater.inflate(R.layout.fragment_friend,container,false);
         recyclerView=(RecyclerView) view.findViewById(R.id.friend_recycler_view);
         LinearLayoutManager manager=new LinearLayoutManager(getActivity());

@@ -1,10 +1,13 @@
 package com.djsoft.localqq.intent;
 
 import android.content.Intent;
+import android.util.Log;
 
 import com.djsoft.localqq.db.Friend;
 import com.djsoft.localqq.service.ReceiveService;
 import com.djsoft.localqq.util.Constant;
+
+import org.litepal.crud.DataSupport;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -63,12 +66,18 @@ public class LineBroadcast {
      */
     public static void doFriendOnLine(DatagramPacket packet){
         String address = packet.getAddress().getHostAddress();
+        /*
+        接收自己上线消息是主机名为IP地址，接收别人的上线消息是确实有主机名
+        但是主机名格式不好看，因此用手机品牌+型号替代主机名
+         */
+        Log.d("packet", "主机名："+packet.getAddress().getHostName()+"  IP地址："+packet.getAddress().getHostAddress());
         String hostName=new String(packet.getData(),1,packet.getLength()-1);
         Friend friend=new Friend();
         friend.setHostName(hostName);
         friend.setAddress(address);
         if (!friends.contains(friend)){
             friends.add(friend);
+            saveFriend(friend);//保存好友信息到数据库
             Constant.broadcastManager.sendBroadcast(new Intent("com.djsoft.localqq.online"));
         }else {
             return;
@@ -99,6 +108,17 @@ public class LineBroadcast {
             friends.remove(friend);
             //发送好友列表碎片更新广播
             Constant.broadcastManager.sendBroadcast(new Intent("com.djsoft.localqq.offline"));
+        }
+    }
+    /**
+     * 保存好友上线信息(IP地址和主机名)
+     */
+    public static void saveFriend(Friend friend){
+        String hostName=friend.getHostName();
+        String address=friend.getAddress();
+        int result=DataSupport.where("hostName=? and address=?",hostName,address).count(Friend.class);
+        if (result==0){
+            friend.save();
         }
     }
 

@@ -107,7 +107,7 @@ public class ChatActivity extends AppCompatActivity {
         msg.setHostName(hostName);
         msg.setContent(content);
         msg.setType(Constant.TYPE_SENT);
-        msg.setDataTime(Constant.SDF_DB.format(new Date()));
+        msg.setDateTime(Constant.SDF_DB.format(new Date()));
         return msg;
     }
     private List<Msg> getChatRecord(String address){
