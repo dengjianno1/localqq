@@ -10,7 +10,7 @@ public class Friend extends DataSupport{
     private int id;
     private String hostName;
     private String address;
-    private int status;
+    private int iconId;
 
     public int getId() {
         return id;
@@ -36,12 +36,12 @@ public class Friend extends DataSupport{
         this.address = address;
     }
 
-    public int getStatus() {
-        return status;
+    public int getIconId() {
+        return iconId;
     }
 
-    public void setStatus(int status) {
-        this.status = status;
+    public void setIconId(int iconId) {
+        this.iconId = iconId;
     }
 
     @Override

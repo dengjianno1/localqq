@@ -1,5 +1,6 @@
 package com.djsoft.localqq.adapter;
 
+import android.content.Context;
 import android.content.Intent;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -13,6 +14,7 @@ import com.djsoft.localqq.MyApplication;
 import com.djsoft.localqq.R;
 import com.djsoft.localqq.db.Friend;
 import com.djsoft.localqq.util.Constant;
+import com.djsoft.localqq.util.FriendIcon;
 
 import java.util.List;
 
@@ -22,13 +24,16 @@ import java.util.List;
 
 public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.ViewHolder> {
     private List<Friend> mFriendList;
-
+    private Context mContext;
     public FriendAdapter(List<Friend> mFriendList) {
         this.mFriendList = mFriendList;
     }
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        if (mContext==null){
+            mContext=parent.getContext();
+        }
         View view= LayoutInflater.from(parent.getContext()).inflate(R.layout.friend_item,parent,false);
         final ViewHolder holder=new ViewHolder(view);
         holder.friendView.setOnClickListener(new View.OnClickListener() {
@@ -42,6 +47,8 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.ViewHolder
                 chatIntent.putExtra("status", Constant.STATUS_ONLINE);
                 chatIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 MyApplication.getContext().startActivity(chatIntent);
+                //也可以写成
+                //mContext.startActivity(chatIntent);
             }
         });
         return holder;
@@ -50,7 +57,8 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.ViewHolder
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
         Friend friend=mFriendList.get(position);
-        holder.friendImage.setImageResource(R.mipmap.ic_launcher);
+        holder.friendImage.setImageResource(FriendIcon.getFriendIcon(friend.getIconId()));
+        //Glide.with(mContext).load(FriendIcon.getFriendIcon(friend.getIconId())).into(holder.friendImage);这句话的展示效果并不好
         holder.friendName.setText(friend.getHostName());
         holder.friendAddress.setText(friend.getAddress());
     }

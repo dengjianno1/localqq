@@ -4,8 +4,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
-import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
@@ -25,27 +25,32 @@ import org.litepal.crud.DataSupport;
 import java.util.Date;
 import java.util.List;
 
-public class ChatActivity extends AppCompatActivity {
+public class ChatActivity extends BaseActivity {
     public static final int MESSAGE_CONTENT=1;
     private static ListView listView;
     private static List<Msg> msgList;
-    public static Handler handler=new Handler(){
+    private static MsgAdapter msgAdapter;
+    public static Handler handler=new Handler(Looper.getMainLooper().getMainLooper()){
         @Override
         public void handleMessage(Message message) {
             switch (message.what){
                 case MESSAGE_CONTENT :
-                    Constant.vibrator.vibrate(Constant.pattern,-1);
+                    Constant.vibrator.vibrate(Constant.pattern,-1);//震动
                     Msg receiveMsg=(Msg)message.obj;
-                    msgAdapter.add(receiveMsg);
+                    if (whatActivity==ChatActivity.class){//当还没有进入ChatActivity时,listView没必要更新
+                        msgAdapter.add(receiveMsg);
+                        listView.smoothScrollToPosition(listView.getMaxScrollAmount());
+                    }
                     receiveMsg.save();
-                    listView.smoothScrollToPosition(listView.getMaxScrollAmount());
+                    Intent intent=new Intent("com.djsoft.localqq.ChatActivity.UPDATE_LAST_CONTENT");
+                    intent.putExtra("address",receiveMsg.getAddress());
+                    Constant.broadcastManager.sendBroadcast(intent);
                     break;
                 default:
                     break;
             }
         }
     };
-    private static MsgAdapter msgAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -105,7 +110,8 @@ public class ChatActivity extends AppCompatActivity {
             }
         });
     }
-    private Msg selfMessage(String address,String hostName,String content){
+
+    private Msg selfMessage(String address, String hostName, String content){
         Msg msg=new Msg();
         msg.setAddress(address);
         msg.setHostName(hostName);

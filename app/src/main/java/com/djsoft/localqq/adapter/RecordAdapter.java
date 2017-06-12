@@ -2,6 +2,7 @@ package com.djsoft.localqq.adapter;
 
 import android.content.Intent;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,9 +12,13 @@ import android.widget.TextView;
 import com.djsoft.localqq.ChatActivity;
 import com.djsoft.localqq.MyApplication;
 import com.djsoft.localqq.R;
+import com.djsoft.localqq.db.Friend;
 import com.djsoft.localqq.db.Record;
 import com.djsoft.localqq.util.FormatDateTime;
+import com.djsoft.localqq.util.FriendIcon;
 import com.djsoft.localqq.util.FriendStatus;
+
+import org.litepal.crud.DataSupport;
 
 import java.util.List;
 
@@ -51,9 +56,15 @@ public class RecordAdapter extends RecyclerView.Adapter<RecordAdapter.ViewHolder
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
         Record record=mRecordList.get(position);
-        holder.friendImage.setImageResource(R.mipmap.ic_launcher);
         holder.friendName.setText(record.getHostName());
         holder.lastRecord.setText(record.getContent());
+        List<Friend> friends= DataSupport.select("iconId").where("address=? and hostName=?",record.getAddress(),record.getHostName()).find(Friend.class);
+        if (friends.size()!=1){
+            Log.d("RecordAdapter", "数据库好友信息有误",new Exception());
+            holder.friendImage.setImageResource(R.mipmap.ic_launcher);
+        }else {
+            holder.friendImage.setImageResource(FriendIcon.getFriendIcon(friends.get(0).getIconId()));
+        }
         holder.dataTime.setText(FormatDateTime.getFromatDataTime(record.getDateTime()));
     }
 
@@ -62,7 +73,7 @@ public class RecordAdapter extends RecyclerView.Adapter<RecordAdapter.ViewHolder
         return mRecordList.size();
     }
 
-    static class ViewHolder extends RecyclerView.ViewHolder{
+    public static class ViewHolder extends RecyclerView.ViewHolder{
         View recordView;
         ImageView friendImage;
         TextView friendName;

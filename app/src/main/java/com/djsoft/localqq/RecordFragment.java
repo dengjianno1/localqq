@@ -1,18 +1,23 @@
 package com.djsoft.localqq;
 
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.djsoft.localqq.adapter.RecordAdapter;
 import com.djsoft.localqq.db.Record;
+import com.djsoft.localqq.util.Constant;
 
 import org.litepal.crud.DataSupport;
 
@@ -20,27 +25,39 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-public class RecordFragment extends Fragment {
+public class RecordFragment extends BaseFragment {
 
 
     private RecyclerView recyclerView;
     private RecordAdapter adapter;
+    private LinearLayoutManager manager;
+    private UpdateLastContentReceiver updateLastContentReceiver;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view=inflater.inflate(R.layout.fragment_record, container, false);
         recyclerView = (RecyclerView) view.findViewById(R.id.record_recycler_view);
-        LinearLayoutManager manager=new LinearLayoutManager(getActivity());
+        manager = new LinearLayoutManager(getActivity());
         recyclerView.setLayoutManager(manager);
         adapter = new RecordAdapter(getRecords());
+        recyclerView.setAdapter(adapter);
+        IntentFilter intentFilter=new IntentFilter();
+        intentFilter.addAction("com.djsoft.localqq.ChatActivity.UPDATE_LAST_CONTENT");
+        updateLastContentReceiver=new UpdateLastContentReceiver();
+        Constant.broadcastManager.registerReceiver(updateLastContentReceiver,intentFilter);
         return view;
     }
 
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        recyclerView.setAdapter(adapter);
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        Constant.broadcastManager.unregisterReceiver(updateLastContentReceiver);
     }
 
     private List<Record> getRecords(){
@@ -79,5 +96,26 @@ public class RecordFragment extends Fragment {
             string=string.substring(0,12)+"...";
         }
         return string;
+    }
+    private void notifItem(String string){
+        int firstPosition=manager.findFirstVisibleItemPosition();
+        int lastPosition=manager.findLastVisibleItemPosition();
+        for (int i = firstPosition; i <= lastPosition; i++) {
+            View childView=manager.findViewByPosition(i);
+            if (childView != null&&childView.getTag()!=null) {
+                RecordAdapter.ViewHolder holder=(RecordAdapter.ViewHolder) childView.getTag();
+                if (holder != null) {
+                    adapter.notifyItemChanged(i);
+                }
+            }
+        }
+    }
+    class UpdateLastContentReceiver extends BroadcastReceiver{
+        @Override
+        public void onReceive(Context context, Intent intent) {
+           String address=intent.getStringExtra("address");
+            //notifItem(address);
+            Log.d("局部更新",address);
+        }
     }
 }

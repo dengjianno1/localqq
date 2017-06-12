@@ -76,8 +76,8 @@ public class LineBroadcast {
         friend.setHostName(hostName);
         friend.setAddress(address);
         if (!friends.contains(friend)){
+            friend=saveFriend(friend);//保存好友信息到数据库
             friends.add(friend);
-            saveFriend(friend);//保存好友信息到数据库
             Constant.broadcastManager.sendBroadcast(new Intent("com.djsoft.localqq.online"));
         }else {
             return;
@@ -113,13 +113,22 @@ public class LineBroadcast {
     /**
      * 保存好友上线信息(IP地址和主机名)
      */
-    public static void saveFriend(Friend friend){
+    public static Friend saveFriend(Friend friend){
         String hostName=friend.getHostName();
         String address=friend.getAddress();
-        int result=DataSupport.where("hostName=? and address=?",hostName,address).count(Friend.class);
-        if (result==0){
+        List<Friend> result=DataSupport.select("hostName","address","iconId")
+                .where("hostName=? and address=?",hostName,address).find(Friend.class);
+        //int result=DataSupport.where("hostName=? and address=?",hostName,address).count(Friend.class);
+        if (result.isEmpty()){
             friend.save();
+            friend.setIconId(friend.getId()%10+1);//根据ID计算头像ID
+            friend.save();
+            return friend;
+        }else if (result.size()==1){
+            return result.get(0);
         }
+        Log.e(TAG, "数据库好友信息表数据有问题",new Exception() );
+        return null;
     }
 
 }

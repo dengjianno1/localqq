@@ -32,7 +32,7 @@ public class TransportMessage {
         msg.setContent (new String(data,0,len));
         Log.d("packet", "主机名："+packet.getAddress().getHostName()+"  IP地址："+packet.getAddress().getHostAddress());
         msg.setAddress(packet.getAddress().getHostAddress());
-        msg.setHostName(getFriendName(packet.getAddress().getHostAddress()));
+        msg.setHostName(getFriendName(packet.getAddress().getHostAddress()));//从数据库中取好友主机名
         msg.setDateTime(Constant.SDF_DB.format(new Date()));
         msg.setType(Constant.TYPE_RECEIVED);
         Message message=new Message();
