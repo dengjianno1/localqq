@@ -8,8 +8,7 @@ import org.litepal.crud.DataSupport;
 
 public class Record extends DataSupport{
     private int id;
-    private String hostName;
-    private String address;
+    private int friendId;
     private String content;
     private String dateTime;
 
@@ -21,20 +20,12 @@ public class Record extends DataSupport{
         this.id = id;
     }
 
-    public String getHostName() {
-        return hostName;
+    public int getFriendId() {
+        return friendId;
     }
 
-    public void setHostName(String hostName) {
-        this.hostName = hostName;
-    }
-
-    public String getAddress() {
-        return address;
-    }
-
-    public void setAddress(String address) {
-        this.address = address;
+    public void setFriendId(int friendId) {
+        this.friendId = friendId;
     }
 
     public String getContent() {

@@ -61,26 +61,25 @@ public class RecordFragment extends BaseFragment {
     }
 
     private List<Record> getRecords(){
-        List<String> addressList=new ArrayList<>();
+        List<Integer> friendIdList=new ArrayList<>();
         List<Record> recordList=new ArrayList<>();
         //查找联系过的好友
-        Cursor cursor= DataSupport.findBySQL("select distinct address from Msg");
+        Cursor cursor= DataSupport.findBySQL("select distinct friendid from Msg");
         if (cursor.moveToFirst()){
             do{
-                String address=cursor.getString(cursor.getColumnIndex("address"));
-                addressList.add(address);
+                int friendId=cursor.getInt(cursor.getColumnIndex("friendid"));//数据库中表名没有大写
+                friendIdList.add(friendId);
             }while (cursor.moveToNext());
         }
         cursor.close();
         //查找最近一条记录
-        for (String address:addressList) {
+        for (Integer friendId:friendIdList) {
             //Msg msg=DataSupport.select("address","content","dateTime").where("address=?",address).order("id").findLast(Msg.class);
-            cursor=DataSupport.findBySQL("select hostName,address,content,dateTime from Msg where address=? order by id desc",address);
+            cursor=DataSupport.findBySQL("select content,dateTime from Msg where friendId=? order by id desc",String.valueOf(friendId));
             if (cursor!=null){
                 while (cursor.moveToNext()){
                     Record record=new Record();
-                    record.setHostName(trimContent(cursor.getString(cursor.getColumnIndex("hostname"))));
-                    record.setAddress(cursor.getString(cursor.getColumnIndex("address")));
+                    record.setFriendId(friendId);
                     record.setContent(trimContent(cursor.getString(cursor.getColumnIndex("content"))));
                     record.setDateTime(cursor.getString(cursor.getColumnIndex("datetime")));
                     recordList.add(record);

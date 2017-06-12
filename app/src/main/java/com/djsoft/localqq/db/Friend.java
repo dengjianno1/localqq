@@ -2,11 +2,13 @@ package com.djsoft.localqq.db;
 
 import org.litepal.crud.DataSupport;
 
+import java.io.Serializable;
+
 /**
  * Created by dengjian on 2017/6/1.
  */
 
-public class Friend extends DataSupport{
+public class Friend extends DataSupport implements Serializable{
     private int id;
     private String hostName;
     private String address;

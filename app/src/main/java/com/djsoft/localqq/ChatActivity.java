@@ -1,11 +1,17 @@
 package com.djsoft.localqq;
 
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.support.v7.app.NotificationCompat;
 import android.text.TextUtils;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
@@ -16,6 +22,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.djsoft.localqq.adapter.MsgAdapter;
+import com.djsoft.localqq.db.Friend;
 import com.djsoft.localqq.db.Msg;
 import com.djsoft.localqq.intent.TransportMessage;
 import com.djsoft.localqq.util.Constant;
@@ -30,6 +37,7 @@ public class ChatActivity extends BaseActivity {
     private static ListView listView;
     private static List<Msg> msgList;
     private static MsgAdapter msgAdapter;
+    private static NotificationManager manager=(NotificationManager) MyApplication.getContext().getSystemService(Context.NOTIFICATION_SERVICE);
     public static Handler handler=new Handler(Looper.getMainLooper().getMainLooper()){
         @Override
         public void handleMessage(Message message) {
@@ -37,14 +45,30 @@ public class ChatActivity extends BaseActivity {
                 case MESSAGE_CONTENT :
                     Constant.vibrator.vibrate(Constant.pattern,-1);//震动
                     Msg receiveMsg=(Msg)message.obj;
-                    if (whatActivity==ChatActivity.class){//当还没有进入ChatActivity时,listView没必要更新
+                    if (whatActivity==ChatActivity.class){//当还没有进入ChatActivity时,listView没必要更新,发送通知
                         msgAdapter.add(receiveMsg);
                         listView.smoothScrollToPosition(listView.getMaxScrollAmount());
+                    }else {
+                        Friend friend=DataSupport.select("id","address","hostname","iconid")
+                                .where("id=?",String.valueOf(receiveMsg.getFriendId())).findFirst(Friend.class);
+                        Intent intent=new Intent(MyApplication.getContext(),ChatActivity.class);
+                        intent.putExtra("friend",friend);
+                        intent.putExtra("status", Constant.STATUS_ONLINE);
+                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        PendingIntent pendingIntent=PendingIntent.getActivity(MyApplication.getContext(),0,intent,0);
+                        Notification notification=new NotificationCompat.Builder(MyApplication.getContext())
+                                .setContentTitle(friend.getHostName()).setContentText(receiveMsg.getContent())
+                                .setWhen(System.currentTimeMillis()).setSmallIcon(R.drawable.small_icon)
+                                .setLargeIcon(BitmapFactory.decodeResource(MyApplication.getContext().getResources(),R.drawable.large_icon))
+                                .setPriority(NotificationCompat.PRIORITY_MAX).setDefaults(NotificationCompat.DEFAULT_SOUND)
+                                .setContentIntent(pendingIntent).setAutoCancel(true)
+                                .setLights(Color.GREEN,1000,1000).build();
+                        manager.notify(Constant.MSG_NOTIFICATION,notification);
                     }
                     receiveMsg.save();
-                    Intent intent=new Intent("com.djsoft.localqq.ChatActivity.UPDATE_LAST_CONTENT");
-                    intent.putExtra("address",receiveMsg.getAddress());
-                    Constant.broadcastManager.sendBroadcast(intent);
+                    //Intent intent=new Intent("com.djsoft.localqq.ChatActivity.UPDATE_LAST_CONTENT");
+                    //intent.putExtra("address",receiveMsg.getAddress());
+                    //Constant.broadcastManager.sendBroadcast(intent);
                     break;
                 default:
                     break;
@@ -57,12 +81,11 @@ public class ChatActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
         Intent intent=getIntent();
-        final String hostName=intent.getStringExtra("hostName");
-        final String address=intent.getStringExtra("address");
+        final Friend friend=(Friend) intent.getSerializableExtra("friend");
         int status=intent.getIntExtra("status",Constant.STATUS_OFFLINE);//默认不在线
         TextView titleView=(TextView) findViewById(R.id.title_text);
-        titleView.setText(hostName);
-        msgList=getChatRecord(address);
+        titleView.setText(friend.getHostName());
+        msgList=getChatRecord(friend.getId());
         msgAdapter = new MsgAdapter(this, R.layout.msg_item, msgList);
         listView = (ListView) findViewById(R.id.msg_list_view);
         listView.setAdapter(msgAdapter);
@@ -77,10 +100,10 @@ public class ChatActivity extends BaseActivity {
                     Toast.makeText(ChatActivity.this, "发送内容不能为空！", Toast.LENGTH_SHORT).show();
                 }else {
                     //发送消息并保存
-                    Msg sendMsg=selfMessage(address,hostName,input);
+                    Msg sendMsg=selfMessage(friend.getAddress(),friend.getHostName(),input);
                     msgAdapter.add(sendMsg);
                     sendMsg.save();
-                    TransportMessage.sendMessage(input,address);
+                    TransportMessage.sendMessage(input,friend.getAddress());
                     contentText.setText("");
                     listView.smoothScrollToPosition(listView.getMaxScrollAmount());
                 }
@@ -111,17 +134,16 @@ public class ChatActivity extends BaseActivity {
         });
     }
 
-    private Msg selfMessage(String address, String hostName, String content){
+    private Msg selfMessage(String address,String hostName,String content){
         Msg msg=new Msg();
-        msg.setAddress(address);
-        msg.setHostName(hostName);
+        msg.setFriendId(DataSupport.select("id").where("address=? and hostname=?",address,hostName).order("id").findLast(Friend.class).getId());
         msg.setContent(content);
         msg.setType(Constant.TYPE_SENT);
         msg.setDateTime(Constant.SDF_DB.format(new Date()));
         return msg;
     }
-    private List<Msg> getChatRecord(String address){
-        return DataSupport.select("content","type").where("address=?",address)
+    private List<Msg> getChatRecord(int friendId){
+        return DataSupport.select("content","type").where("friendId=?",String.valueOf(friendId))
                 .order("id").find(Msg.class);
     }
 

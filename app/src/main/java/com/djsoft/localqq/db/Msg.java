@@ -10,8 +10,7 @@ public class Msg extends DataSupport{
     private int id;
     private String content;
     private int type;
-    private String hostName;
-    private String address;
+    private int friendId;
     private String dateTime;
 
     public int getId() {
@@ -46,19 +45,11 @@ public class Msg extends DataSupport{
         this.dateTime = dataTime;
     }
 
-    public String getHostName() {
-        return hostName;
+    public int getFriendId() {
+        return friendId;
     }
 
-    public void setHostName(String hostName) {
-        this.hostName = hostName;
-    }
-
-    public String getAddress() {
-        return address;
-    }
-
-    public void setAddress(String address) {
-        this.address = address;
+    public void setFriendId(int friendId) {
+        this.friendId = friendId;
     }
 }

@@ -1,8 +1,8 @@
 package com.djsoft.localqq.adapter;
 
+import android.content.Context;
 import android.content.Intent;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -28,13 +28,16 @@ import java.util.List;
 
 public class RecordAdapter extends RecyclerView.Adapter<RecordAdapter.ViewHolder> {
     private List<Record> mRecordList;
-
+    private Context mContext;
     public RecordAdapter(List<Record> recordList) {
         this.mRecordList = recordList;
     }
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        if (mContext==null){
+            mContext=parent.getContext();
+        }
         View view= LayoutInflater.from(parent.getContext()).inflate(R.layout.record_item,parent,false);
         final ViewHolder holder=new ViewHolder(view);
         holder.recordView.setOnClickListener(new View.OnClickListener() {
@@ -42,10 +45,11 @@ public class RecordAdapter extends RecyclerView.Adapter<RecordAdapter.ViewHolder
             public void onClick(View v) {
                 int position=holder.getAdapterPosition();
                 Record record=mRecordList.get(position);
-                Intent chatIntent=new Intent(MyApplication.getContext(), ChatActivity.class);
-                chatIntent.putExtra("address",record.getAddress());
-                chatIntent.putExtra("hostName",record.getHostName());
-                chatIntent.putExtra("status", FriendStatus.getFriendStatus(record.getAddress(),record.getHostName()));
+                Intent chatIntent=new Intent(mContext, ChatActivity.class);
+                Friend friend=DataSupport.select("hostName","address","iconId")
+                        .where("id=?",String.valueOf(record.getFriendId())).findFirst(Friend.class);
+                chatIntent.putExtra("friend",friend);
+                chatIntent.putExtra("status", FriendStatus.getFriendStatus(friend.getAddress(),friend.getHostName()));
                 chatIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 MyApplication.getContext().startActivity(chatIntent);
             }
@@ -56,15 +60,11 @@ public class RecordAdapter extends RecyclerView.Adapter<RecordAdapter.ViewHolder
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
         Record record=mRecordList.get(position);
-        holder.friendName.setText(record.getHostName());
+        Friend friend=DataSupport.select("hostName","address","iconId")
+                .where("id=?",String.valueOf(record.getFriendId())).findFirst(Friend.class);
+        holder.friendName.setText(friend.getHostName());
         holder.lastRecord.setText(record.getContent());
-        List<Friend> friends= DataSupport.select("iconId").where("address=? and hostName=?",record.getAddress(),record.getHostName()).find(Friend.class);
-        if (friends.size()!=1){
-            Log.d("RecordAdapter", "数据库好友信息有误",new Exception());
-            holder.friendImage.setImageResource(R.mipmap.ic_launcher);
-        }else {
-            holder.friendImage.setImageResource(FriendIcon.getFriendIcon(friends.get(0).getIconId()));
-        }
+        holder.friendImage.setImageResource(FriendIcon.getFriendIcon(friend.getIconId()));
         holder.dataTime.setText(FormatDateTime.getFromatDataTime(record.getDateTime()));
     }
 

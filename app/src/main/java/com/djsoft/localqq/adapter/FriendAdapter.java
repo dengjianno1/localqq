@@ -41,9 +41,8 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.ViewHolder
             public void onClick(View v) {
                 int position=holder.getAdapterPosition();
                 Friend friend=mFriendList.get(position);
-                Intent chatIntent=new Intent(MyApplication.getContext(), ChatActivity.class);
-                chatIntent.putExtra("address",friend.getAddress());
-                chatIntent.putExtra("hostName",friend.getHostName());
+                Intent chatIntent=new Intent(mContext, ChatActivity.class);
+                chatIntent.putExtra("friend",friend);
                 chatIntent.putExtra("status", Constant.STATUS_ONLINE);
                 chatIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 MyApplication.getContext().startActivity(chatIntent);

@@ -31,8 +31,7 @@ public class TransportMessage {
         Msg msg=new Msg();
         msg.setContent (new String(data,0,len));
         Log.d("packet", "主机名："+packet.getAddress().getHostName()+"  IP地址："+packet.getAddress().getHostAddress());
-        msg.setAddress(packet.getAddress().getHostAddress());
-        msg.setHostName(getFriendName(packet.getAddress().getHostAddress()));//从数据库中取好友主机名
+        msg.setFriendId(getFriendId(packet.getAddress().getHostAddress()));//从数据库中取好友Id
         msg.setDateTime(Constant.SDF_DB.format(new Date()));
         msg.setType(Constant.TYPE_RECEIVED);
         Message message=new Message();
@@ -59,15 +58,13 @@ public class TransportMessage {
     /**
      * 从数据库中取好友主机名
      */
-    public static String getFriendName(String address){
-        List<Friend> friendList= DataSupport.select("hostName").where("address=?",address).find(Friend.class);
-        if (friendList.isEmpty()){
-            Log.e("TransportMessage", "从数据库中获取好友主机名数量为0",new Exception() );
-        }else if (friendList.size()>1){
-            Log.e("TransportMessage", "从数据库中获取好友主机名数量大于1",new Exception() );
+    public static int getFriendId(String address){
+        List<Friend> friendList= DataSupport.select("id").where("address=?",address).find(Friend.class);
+        if (friendList.size()!=1){
+            Log.e("TransportMessage", "从数据库中获取好友主机名数量不为1",new Exception() );
+            return 0;
         }else {
-            return friendList.get(0).getHostName();
+            return friendList.get(0).getId();
         }
-        return address;
     }
 }

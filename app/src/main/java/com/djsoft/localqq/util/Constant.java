@@ -29,6 +29,7 @@ public abstract class Constant {
     public static final LocalBroadcastManager broadcastManager=LocalBroadcastManager.getInstance(MyApplication.getContext());
     public static final long[] pattern = {250, 250, 250, 250};
     public static final Vibrator vibrator = (Vibrator) MyApplication.getContext().getSystemService(VIBRATOR_SERVICE);
+    public static final int MSG_NOTIFICATION=1;
     public static byte[] doPacket(byte b,String string){
         byte[] strByte=string.getBytes();
         byte[] result=new byte[strByte.length+1];
