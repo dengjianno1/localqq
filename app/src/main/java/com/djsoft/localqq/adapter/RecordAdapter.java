@@ -14,6 +14,7 @@ import com.djsoft.localqq.MyApplication;
 import com.djsoft.localqq.R;
 import com.djsoft.localqq.db.Friend;
 import com.djsoft.localqq.db.Record;
+import com.djsoft.localqq.util.Constant;
 import com.djsoft.localqq.util.FormatDateTime;
 import com.djsoft.localqq.util.FriendIcon;
 import com.djsoft.localqq.util.FriendStatus;
@@ -62,7 +63,7 @@ public class RecordAdapter extends RecyclerView.Adapter<RecordAdapter.ViewHolder
         Record record=mRecordList.get(position);
         Friend friend=DataSupport.select("hostName","address","iconId")
                 .where("id=?",String.valueOf(record.getFriendId())).findFirst(Friend.class);
-        holder.friendName.setText(friend.getHostName());
+        holder.friendName.setText(Constant.trimContent(friend.getHostName()));
         holder.lastRecord.setText(record.getContent());
         holder.friendImage.setImageResource(FriendIcon.getFriendIcon(friend.getIconId()));
         holder.dataTime.setText(FormatDateTime.getFromatDataTime(record.getDateTime()));

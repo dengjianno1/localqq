@@ -39,4 +39,14 @@ public abstract class Constant {
         }
         return result;
     }
+
+    /**
+     * 截断过长的字符串
+     */
+    public static String trimContent(String string){
+        if (string.length()>20){
+            string=string.substring(0,17)+"...";
+        }
+        return string;
+    }
 }

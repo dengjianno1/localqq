@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -52,6 +53,8 @@ public class RecordFragment extends BaseFragment {
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+        Toolbar toolbar=(Toolbar)getActivity().findViewById(R.id.toolbar);
+        toolbar.setTitle("聊天记录");
     }
 
     @Override
@@ -80,7 +83,7 @@ public class RecordFragment extends BaseFragment {
                 while (cursor.moveToNext()){
                     Record record=new Record();
                     record.setFriendId(friendId);
-                    record.setContent(trimContent(cursor.getString(cursor.getColumnIndex("content"))));
+                    record.setContent(Constant.trimContent((cursor.getString(cursor.getColumnIndex("content")))));
                     record.setDateTime(cursor.getString(cursor.getColumnIndex("datetime")));
                     recordList.add(record);
                     break;
@@ -90,12 +93,7 @@ public class RecordFragment extends BaseFragment {
         }
         return  recordList;
     }
-    private String trimContent(String string){
-        if (string.length()>15){
-            string=string.substring(0,12)+"...";
-        }
-        return string;
-    }
+
     private void notifItem(String string){
         int firstPosition=manager.findFirstVisibleItemPosition();
         int lastPosition=manager.findLastVisibleItemPosition();

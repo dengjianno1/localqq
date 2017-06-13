@@ -34,6 +34,7 @@ public class MainActivity extends BaseActivity {
             actionBar.setDisplayHomeAsUpEnabled(true);
             actionBar.setHomeAsUpIndicator(R.drawable.ic_menu);
         }
+        actionBar.setTitle("在线好友");
         final NavigationView navigationView=(NavigationView) findViewById(R.id.nav_view);
         BottomNavigationBar BNBar=(BottomNavigationBar) findViewById(R.id.BNBar);
 

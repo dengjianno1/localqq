@@ -85,7 +85,7 @@ public class ChatActivity extends BaseActivity {
         final Friend friend=(Friend) intent.getSerializableExtra("friend");
         int status=intent.getIntExtra("status",Constant.STATUS_OFFLINE);//默认不在线
         TextView titleView=(TextView) findViewById(R.id.title_text);
-        titleView.setText(friend.getHostName());
+        titleView.setText(Constant.trimContent(friend.getHostName()));
         msgList=getChatRecord(friend.getId());
         msgAdapter = new MsgAdapter(this, R.layout.msg_item, msgList);
         listView = (ListView) findViewById(R.id.msg_list_view);

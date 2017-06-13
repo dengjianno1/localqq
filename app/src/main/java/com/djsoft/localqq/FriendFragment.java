@@ -9,6 +9,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -52,7 +53,10 @@ public class FriendFragment extends BaseFragment {
         intentFilter.addAction("com.djsoft.localqq.online");
         intentFilter.addAction("com.djsoft.localqq.offline");
         Constant.broadcastManager.registerReceiver(lineReceiver,intentFilter);
+        Toolbar toolbar=(Toolbar)getActivity().findViewById(R.id.toolbar);
+        toolbar.setTitle("在线好友");
     }
+
 
     @Override
     public void onDestroy() {

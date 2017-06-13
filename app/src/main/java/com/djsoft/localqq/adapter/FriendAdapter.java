@@ -58,7 +58,7 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.ViewHolder
         Friend friend=mFriendList.get(position);
         holder.friendImage.setImageResource(FriendIcon.getFriendIcon(friend.getIconId()));
         //Glide.with(mContext).load(FriendIcon.getFriendIcon(friend.getIconId())).into(holder.friendImage);这句话的展示效果并不好
-        holder.friendName.setText(friend.getHostName());
+        holder.friendName.setText(Constant.trimContent(friend.getHostName()));
         holder.friendAddress.setText(friend.getAddress());
     }
 
