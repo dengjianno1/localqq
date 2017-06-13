@@ -66,6 +66,7 @@ public class ChatActivity extends BaseActivity {
                         manager.notify(Constant.MSG_NOTIFICATION,notification);
                     }
                     receiveMsg.save();
+                    //实时更新聊天记录(不好弄战时搁置)
                     //Intent intent=new Intent("com.djsoft.localqq.ChatActivity.UPDATE_LAST_CONTENT");
                     //intent.putExtra("address",receiveMsg.getAddress());
                     //Constant.broadcastManager.sendBroadcast(intent);
