@@ -10,7 +10,10 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
+import android.support.v7.widget.Toolbar;
+import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import com.ashokvarma.bottomnavigation.BottomNavigationBar;
 import com.ashokvarma.bottomnavigation.BottomNavigationItem;
@@ -20,31 +23,19 @@ public class MainActivity extends BaseActivity {
     private DrawerLayout mDrawerLayout;
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()){
-            case android.R.id.home:
-                mDrawerLayout.openDrawer(GravityCompat.START);
-                break;
-            default:
-                break;
-        }
-        return true;
-    }
-
-    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         mDrawerLayout=(DrawerLayout) findViewById(R.id.drawer_layout);
+        Toolbar toolbar=(Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
         ActionBar actionBar=getSupportActionBar();
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);
             actionBar.setHomeAsUpIndicator(R.drawable.ic_menu);
         }
-        NavigationView navigationView=(NavigationView) findViewById(R.id.nav_view);
+        final NavigationView navigationView=(NavigationView) findViewById(R.id.nav_view);
         BottomNavigationBar BNBar=(BottomNavigationBar) findViewById(R.id.BNBar);
-
-
 
         BNBar.addItem(new BottomNavigationItem(R.drawable.ic_friends,"联系人"))
                 .addItem(new BottomNavigationItem(R.drawable.ic_comment,"消息"))
@@ -83,12 +74,8 @@ public class MainActivity extends BaseActivity {
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
                 switch (item.getItemId()){
                     case R.id.exit_button:
-                        mDrawerLayout.closeDrawers();
-                        try {
-                            Thread.sleep(300);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
+                        //mDrawerLayout.closeDrawers();
+                        navigationView.setCheckedItem(R.id.exit_button);
                         Intent stopIntent=new Intent(MainActivity.this,ReceiveService.class);
                         stopService(stopIntent);
                         finish();
@@ -100,9 +87,37 @@ public class MainActivity extends BaseActivity {
                 return true;
             }
         });
+
         //初始化各组件后启动接收消息服务
         Intent intent=new Intent(this, ReceiveService.class);
         startService(intent);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.toolbar,menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()){
+            case android.R.id.home:
+                mDrawerLayout.openDrawer(GravityCompat.START);
+                break;
+            case R.id.backup:
+                Toast.makeText(this, "你点击了备份按钮", Toast.LENGTH_SHORT).show();
+                break;
+            case R.id.delete:
+                Toast.makeText(this, "你点击了删除按钮", Toast.LENGTH_SHORT).show();
+                break;
+            case R.id.setting:
+                Toast.makeText(this, "你点击了设置按钮", Toast.LENGTH_SHORT).show();
+                break;
+            default:
+                break;
+        }
+        return true;
     }
     private void replaceFragment(Fragment fragment){
         FragmentManager fragmentManager=getSupportFragmentManager();
