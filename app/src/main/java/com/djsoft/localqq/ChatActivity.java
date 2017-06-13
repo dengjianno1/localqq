@@ -34,6 +34,7 @@ import java.util.List;
 
 public class ChatActivity extends BaseActivity {
     public static final int MESSAGE_CONTENT=1;
+    private static Friend friend;
     private static ListView listView;
     private static List<Msg> msgList;
     private static MsgAdapter msgAdapter;
@@ -45,19 +46,20 @@ public class ChatActivity extends BaseActivity {
                 case MESSAGE_CONTENT :
                     Constant.vibrator.vibrate(Constant.pattern,-1);//震动
                     Msg receiveMsg=(Msg)message.obj;
-                    if (whatActivity==ChatActivity.class){//当还没有进入ChatActivity时,listView没必要更新,发送通知
+                    Friend fromFriend = DataSupport.select("id","address","hostname","iconid")
+                            .where("id=?",String.valueOf(receiveMsg.getFriendId())).findFirst(Friend.class);
+                    //当还没有进入ChatActivity时,listView没必要更新,发送通知
+                    if (whatActivity==ChatActivity.class&&fromFriend.getAddress().equals(friend.getAddress())){
                         msgAdapter.add(receiveMsg);
                         listView.smoothScrollToPosition(listView.getMaxScrollAmount());
                     }else {
-                        Friend friend=DataSupport.select("id","address","hostname","iconid")
-                                .where("id=?",String.valueOf(receiveMsg.getFriendId())).findFirst(Friend.class);
                         Intent intent=new Intent(MyApplication.getContext(),ChatActivity.class);
-                        intent.putExtra("friend",friend);
+                        intent.putExtra("friend", fromFriend);
                         intent.putExtra("status", Constant.STATUS_ONLINE);
                         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                        PendingIntent pendingIntent=PendingIntent.getActivity(MyApplication.getContext(),0,intent,0);
+                        PendingIntent pendingIntent=PendingIntent.getActivity(MyApplication.getContext(),0,intent,PendingIntent.FLAG_UPDATE_CURRENT);
                         Notification notification=new NotificationCompat.Builder(MyApplication.getContext())
-                                .setContentTitle(friend.getHostName()).setContentText(receiveMsg.getContent())
+                                .setContentTitle(fromFriend.getHostName()).setContentText(receiveMsg.getContent())
                                 .setWhen(System.currentTimeMillis()).setSmallIcon(R.drawable.small_icon)
                                 .setLargeIcon(BitmapFactory.decodeResource(MyApplication.getContext().getResources(),R.drawable.large_icon))
                                 .setPriority(NotificationCompat.PRIORITY_MAX).setDefaults(NotificationCompat.DEFAULT_SOUND)
@@ -82,7 +84,7 @@ public class ChatActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
         Intent intent=getIntent();
-        final Friend friend=(Friend) intent.getSerializableExtra("friend");
+        friend=(Friend) intent.getSerializableExtra("friend");
         int status=intent.getIntExtra("status",Constant.STATUS_OFFLINE);//默认不在线
         TextView titleView=(TextView) findViewById(R.id.title_text);
         titleView.setText(Constant.trimContent(friend.getHostName()));
@@ -135,7 +137,13 @@ public class ChatActivity extends BaseActivity {
         });
     }
 
-    private Msg selfMessage(String address,String hostName,String content){
+    @Override
+    protected void onStop() {
+        super.onStop();
+        finish();
+    }
+
+    private Msg selfMessage(String address, String hostName, String content){
         Msg msg=new Msg();
         msg.setFriendId(DataSupport.select("id").where("address=? and hostname=?",address,hostName).order("id").findLast(Friend.class).getId());
         msg.setContent(content);
