@@ -18,6 +18,7 @@ import android.widget.Toast;
 import com.ashokvarma.bottomnavigation.BottomNavigationBar;
 import com.ashokvarma.bottomnavigation.BottomNavigationItem;
 import com.djsoft.localqq.service.ReceiveService;
+import com.djsoft.localqq.util.BackupMsg;
 
 public class MainActivity extends BaseActivity {
     private DrawerLayout mDrawerLayout;
@@ -107,13 +108,13 @@ public class MainActivity extends BaseActivity {
                 mDrawerLayout.openDrawer(GravityCompat.START);
                 break;
             case R.id.backup:
-                Toast.makeText(this, "你点击了备份按钮", Toast.LENGTH_SHORT).show();
+                BackupMsg.doBackupMsg();
                 break;
             case R.id.delete:
                 Toast.makeText(this, "你点击了删除按钮", Toast.LENGTH_SHORT).show();
                 break;
             case R.id.setting:
-                Toast.makeText(this, "你点击了设置按钮", Toast.LENGTH_SHORT).show();
+                BackupMsg.doDownloadMsg();
                 break;
             default:
                 break;
