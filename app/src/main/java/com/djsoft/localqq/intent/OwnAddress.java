@@ -1,6 +1,7 @@
 package com.djsoft.localqq.intent;
 
 import android.content.Context;
+import android.net.DhcpInfo;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.Build;
@@ -17,10 +18,24 @@ import java.util.Enumeration;
  */
 
 public class OwnAddress {
-    public static final String HOST_NAME= Build.BRAND+" "+Build.MODEL;
-    public static final String HOST_ADDRESS=getLocalIpAddress();
-    public static final String HOST_WIFIADDRESS=getWiFiAddress();
-    private static String getLocalIpAddress() {
+    public final String HOST_NAME= Build.BRAND+" "+Build.MODEL;
+    public String HOST_ADDRESS;
+    public String HOST_WIFIADDRESS;
+    public String DHCP_ADDRESS;
+    public static OwnAddress ownAddress=new OwnAddress();
+
+    private OwnAddress() {
+        HOST_WIFIADDRESS=getWiFiAddress();
+        DHCP_ADDRESS=getDHCPAddress();
+    }
+    public static OwnAddress getOwnAddress(){
+        return ownAddress;
+    }
+    public void refreshAddress(){
+        HOST_WIFIADDRESS=getWiFiAddress();
+        DHCP_ADDRESS=getDHCPAddress();
+    }
+    private String getLocalIpAddress() {
         try {
             Enumeration enumNetwork = NetworkInterface.getNetworkInterfaces();
             while (enumNetwork.hasMoreElements()) {
@@ -50,5 +65,14 @@ public class OwnAddress {
         ((ipAddress >> 8 ) & 0xFF) + "." +
         ((ipAddress >> 16 ) & 0xFF) + "." +
         ( ipAddress >> 24 & 0xFF) ;
+    }
+    private static String getDHCPAddress(){
+        WifiManager wifiManager = (WifiManager) MyApplication.getContext().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+        DhcpInfo di = wifiManager.getDhcpInfo();
+        long getewayIpL=di.gateway;
+        return (getewayIpL & 0xFF ) + "." +
+                ((getewayIpL >> 8 ) & 0xFF) + "." +
+                ((getewayIpL >> 16 ) & 0xFF) + "." +
+                ( getewayIpL >> 24 & 0xFF) ;
     }
 }

@@ -14,7 +14,7 @@
     <item
         android:id="@+id/setting"
         android:icon="@drawable/ic_settings"
-        android:title="设置"
+        android:title="下载聊天记录"
         app:showAsAction="never"/>
 
 </menu>

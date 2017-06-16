@@ -22,7 +22,7 @@ public class Utility {
         for (Msg msg:Msgs) {
             JSONObject jsonObject=new JSONObject();
             try {
-                jsonObject.put("address", OwnAddress.HOST_WIFIADDRESS);
+                jsonObject.put("address", OwnAddress.getOwnAddress().HOST_WIFIADDRESS);
                 jsonObject.put("id",msg.getId());
                 jsonObject.put("content",msg.getContent());
                 jsonObject.put("type",msg.getType());

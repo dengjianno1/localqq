@@ -83,7 +83,7 @@ public class LineBroadcast {
             return;
         }
         //回一个在线消息给发送方
-        if (!address.equals(OwnAddress.HOST_WIFIADDRESS)){
+        if (!address.equals(OwnAddress.getOwnAddress().HOST_WIFIADDRESS)){
             try {
                 DatagramPacket onLinePacket=new DatagramPacket(PACKET_ONLINE,PACKET_ONLINE.length,InetAddress.getByName(address), Constant.PORT);
                 Thread.sleep(500);

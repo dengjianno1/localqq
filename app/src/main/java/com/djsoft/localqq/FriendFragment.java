@@ -13,9 +13,11 @@ import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import com.djsoft.localqq.adapter.FriendAdapter;
 import com.djsoft.localqq.intent.LineBroadcast;
+import com.djsoft.localqq.intent.OwnAddress;
 import com.djsoft.localqq.service.ReceiveService;
 import com.djsoft.localqq.util.Constant;
 
@@ -82,6 +84,7 @@ public class FriendFragment extends BaseFragment {
                     public void run() {
                         adapter.notifyDataSetChanged();
                         refreshLayout.setRefreshing(false);
+                        Toast.makeText(getActivity(), OwnAddress.getOwnAddress().HOST_WIFIADDRESS, Toast.LENGTH_SHORT).show();
                     }
                 });
             }
@@ -90,12 +93,15 @@ public class FriendFragment extends BaseFragment {
     class LineReceiver extends BroadcastReceiver{
         @Override
         public void onReceive(Context context, Intent intent) {
-            /**
-             * 这个判断好像没什么用，按后退键会取消注册广播接收器
-             * 按home键和在聊天界面这个判断仍为true
-             */
-            if (getActivity() instanceof MainActivity){
-                adapter.notifyDataSetChanged();//全部刷新，虽然效率不高，但是上线人数本来就不多
+            if("com.djsoft.localqq.online".equals(intent.getAction())||
+                    "com.djsoft.localqq.offline".equals(intent.getAction())){
+                /**
+                 * 这个判断好像没什么用，按后退键会取消注册广播接收器
+                 * 按home键和在聊天界面这个判断仍为true
+                 */
+                if (getActivity() instanceof MainActivity){
+                    adapter.notifyDataSetChanged();//全部刷新，虽然效率不高，但是上线人数本来就不多
+                }
             }
         }
     }

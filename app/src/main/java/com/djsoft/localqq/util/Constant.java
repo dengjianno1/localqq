@@ -24,8 +24,8 @@ public abstract class Constant {
     public static final int STATUS_OFFLINE=-1;
     public static final int TYPE_RECEIVED=0;
     public static final int TYPE_SENT=1;
-    public static final byte[] PACKET_ONLINE = doPacket((byte)1, OwnAddress.HOST_NAME);
-    public static final byte[] PACKET_OFFLINE = doPacket((byte)-1,OwnAddress.HOST_NAME);
+    public static final byte[] PACKET_ONLINE = doPacket((byte)1, OwnAddress.getOwnAddress().HOST_NAME);
+    public static final byte[] PACKET_OFFLINE = doPacket((byte)-1,OwnAddress.getOwnAddress().HOST_NAME);
     public static final LocalBroadcastManager broadcastManager=LocalBroadcastManager.getInstance(MyApplication.getContext());
     public static final long[] pattern = {250, 250, 250, 250};
     public static final Vibrator vibrator = (Vibrator) MyApplication.getContext().getSystemService(VIBRATOR_SERVICE);

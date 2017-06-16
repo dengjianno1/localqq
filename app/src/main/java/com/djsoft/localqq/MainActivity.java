@@ -1,24 +1,44 @@
 package com.djsoft.localqq;
 
+import android.content.Context;
 import android.content.Intent;
+import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.Toast;
 
 import com.ashokvarma.bottomnavigation.BottomNavigationBar;
 import com.ashokvarma.bottomnavigation.BottomNavigationItem;
+import com.djsoft.localqq.db.Msg;
 import com.djsoft.localqq.service.ReceiveService;
 import com.djsoft.localqq.util.BackupMsg;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+
+import org.litepal.crud.DataSupport;
+
+import java.io.IOException;
+import java.lang.reflect.Type;
+import java.net.URLDecoder;
+import java.util.List;
+
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.Response;
 
 public class MainActivity extends BaseActivity {
     private DrawerLayout mDrawerLayout;
@@ -103,18 +123,122 @@ public class MainActivity extends BaseActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        WifiManager wifiManager = (WifiManager) MyApplication.getContext().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+        final RecyclerView recyclerView=(RecyclerView)findViewById(R.id.record_recycler_view);
         switch (item.getItemId()){
             case android.R.id.home:
                 mDrawerLayout.openDrawer(GravityCompat.START);
                 break;
             case R.id.backup:
-                BackupMsg.doBackupMsg();
+                if (wifiManager.isWifiEnabled()){
+                    if (NetworkReceiver.isConnected){
+                        List<Msg> msgList= DataSupport.findAll(Msg.class);
+                        if (msgList.isEmpty()){
+                            Toast.makeText(this, "聊天记录为空，无需上传！", Toast.LENGTH_SHORT).show();
+                        }else {
+                            BackupMsg.doBackupMsg(msgList,new Callback() {
+                                @Override
+                                public void onFailure(Call call, IOException e) {
+                                    Log.e("BackupMsg", e.getMessage());
+                                    runOnUiThread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            Toast.makeText(MainActivity.this, "服务器无响应，聊天上传同步失败！", Toast.LENGTH_SHORT).show();
+                                        }
+                                    });
+                                }
+                                @Override
+                                public void onResponse(Call call, Response response) throws IOException {
+                                    Log.e("BackupMsg", response.body().string());
+                                    runOnUiThread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            Toast.makeText(MainActivity.this, "聊天记录上传成功！", Toast.LENGTH_SHORT).show();
+                                        }
+                                    });
+                                }
+                            });
+                        }
+                    }
+                }else {
+                    Toast.makeText(this, "未连接WIFI，无法上传聊天记录", Toast.LENGTH_SHORT).show();
+                }
                 break;
             case R.id.delete:
-                Toast.makeText(this, "你点击了删除按钮", Toast.LENGTH_SHORT).show();
+                //final List<Msg> msgList=DataSupport.select("content","type","friendid","datetime").order("id").find(Msg.class);
+                final List<Msg> msgList=DataSupport.findAll(Msg.class);
+                DataSupport.deleteAll(Msg.class);
+                Snackbar.make(mDrawerLayout,"删除本地聊天记录",Snackbar.LENGTH_SHORT)
+                        .setAction("取消",new View.OnClickListener(){
+                            @Override
+                            public void onClick(View v) {
+                                for (Msg msg:msgList) {
+                                    Msg temp=new Msg();
+                                    temp.setId(msg.getId());
+                                    temp.setContent(msg.getContent());
+                                    temp.setFriendId(msg.getFriendId());
+                                    temp.setType(msg.getType());
+                                    temp.setDateTime(msg.getDateTime());
+                                    temp.save();
+                                }
+                                if (recyclerView!=null){
+                                    replaceFragment(new RecordFragment());
+                                }
+                            }
+                        }).show();
+                if (recyclerView!=null){
+                    replaceFragment(new RecordFragment());
+                }
                 break;
             case R.id.setting:
-                BackupMsg.doDownloadMsg();
+                if (wifiManager.isWifiEnabled()){
+                    if (NetworkReceiver.isConnected){
+                        BackupMsg.doDownloadMsg(new Callback() {
+                            @Override
+                            public void onFailure(Call call, IOException e) {
+                                Log.e("BackupMsg", e.getMessage());
+                                runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        Toast.makeText(MainActivity.this, "服务器无响应，下载聊天记录失败！", Toast.LENGTH_SHORT).show();
+                                    }
+                                });
+                            }
+
+                            @Override
+                            public void onResponse(Call call, Response response) throws IOException {
+                                Gson gson=new Gson();
+                                Type type = new TypeToken<List<Msg>>() {}.getType();
+                                String result= URLDecoder.decode(response.body().string(),"utf-8");
+                                List<Msg> msgList=gson.fromJson(result,type);
+                                if (msgList.isEmpty()){
+                                    runOnUiThread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            Toast.makeText(MainActivity.this, "服务器上未发现您的聊天记录!", Toast.LENGTH_SHORT).show();
+                                        }
+                                    });
+                                }else {
+                                    for (Msg msg:msgList) {
+                                        Log.d("BackupMsg", msg.getId()+"  "+msg.getContent()+"  "+msg.getType()+"  "+msg.getFriendId()+"  "+msg.getDateTime());
+                                        msg.save();
+                                    }
+                                    runOnUiThread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            if (recyclerView!=null){
+                                                replaceFragment(new RecordFragment());
+                                            }
+                                            Toast.makeText(MainActivity.this, "聊天记录下载成功！", Toast.LENGTH_SHORT).show();
+                                        }
+                                    });
+                                }
+                            }
+                        });
+                    }
+                }else {
+                    Toast.makeText(this, "未连接WIFI，无法下载聊天记录", Toast.LENGTH_SHORT).show();
+                }
                 break;
             default:
                 break;
